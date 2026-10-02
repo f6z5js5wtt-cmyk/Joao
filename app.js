@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import * as shopee from './shopee.js';
+import * as openai from './openai.js';
 import { fileURLToPath } from 'node:url';
 
 const app = express();
@@ -10,14 +11,49 @@ app.use(cors({ origin: process.env.ALLOWED_ORIGIN }));
 app.get('/api/shopee/status', (_req, res) =>
   res.json({ configured: shopee.isConfigured(), appId: shopee.maskedAppId() }));
 
+const cache = new Map(); // evita estourar o limite de requisições da Shopee
+app.get('/api/report', async (req, res) => {
+  const days = Math.min(90, Math.max(1, Number(req.query.days) || 7));
+  const hit = cache.get(days);
+  if (hit && Date.now() - hit.t < 60e3) return res.json(hit.v);
+  try { const v = await shopee.conversionReport(days); cache.set(days, { t: Date.now(), v }); res.json(v); }
+  catch (e) { res.status(502).json({ error: e.message }); }
+});
+
+const oppCache = new Map();
+app.get('/api/opportunities', async (req, res) => {
+  const key = JSON.stringify(req.query);
+  const hit = oppCache.get(key);
+  if (hit && Date.now() - hit.t < 300e3) return res.json(hit.v);
+  try { const v = await shopee.findOpportunities(req.query); oppCache.set(key, { t: Date.now(), v }); res.json(v); }
+  catch (e) { res.status(502).json({ error: e.message }); }
+});
+
+const prodCache = new Map(); // 3 min: atualiza sempre, sem estourar o limite da Shopee
 app.get('/api/products', async (req, res) => {
-  try { res.json(await shopee.listProducts(req.query)); }
+  const key = JSON.stringify(req.query);
+  const hit = prodCache.get(key);
+  if (hit && Date.now() - hit.t < 180e3) return res.json(hit.v);
+  try { const v = await shopee.listProducts(req.query); prodCache.set(key, { t: Date.now(), v }); res.json(v); }
   catch (e) { res.status(502).json({ error: e.message }); }
 });
 
 app.post('/api/shortlink', async (req, res) => {
   try { res.json({ shortLink: await shopee.shortLink(req.body.url, req.body.subIds) }); }
   catch (e) { res.status(502).json({ error: e.message }); }
+});
+
+
+// Limite simples (o painel não tem login): evita gasto excessivo na OpenAI
+const usage = { start: Date.now(), n: 0 };
+const LIMIT_PER_HOUR = Number(process.env.PROMPT_LIMIT_PER_HOUR || 30);
+app.get('/api/openai/status', (_req, res) =>
+  res.json({ configured: openai.isConfigured(), model: openai.modelName() }));
+app.post('/api/prompt', async (req, res) => {
+  if (Date.now() - usage.start > 3600e3) { usage.start = Date.now(); usage.n = 0; }
+  if (++usage.n > LIMIT_PER_HOUR) return res.status(429).json({ error: 'Limite de prompts por hora atingido' });
+  try { res.json({ prompt: await openai.generateVideoPrompt(req.body || {}) }); }
+  catch (e) { res.status(e.status || 502).json({ error: e.message }); }
 });
 
 app.get('/',(_req,res)=>res.sendFile(fileURLToPath(new URL('./index.html',import.meta.url))));
