@@ -82,6 +82,19 @@ app.get('/api/telegram/chats', async (_req, res) => {
   try { res.json(await telegram.listChats()); } catch (e) { res.status(e.status || 502).json({ error: e.message }); }
 });
 const tgUsage = { start: Date.now(), n: 0 };
+const tgLimit = (res) => {
+  if (Date.now() - tgUsage.start > 3600e3) { tgUsage.start = Date.now(); tgUsage.n = 0; }
+  if (++tgUsage.n > 20) { res.status(429).json({ error: 'Limite de envios por hora atingido' }); return true; }
+  return false;
+};
+app.post('/api/telegram/test', async (_req, res) => {
+  try { if (tgLimit(res)) return; await telegram.sendMessage('✅ AfiliadoFlow conectado ao Telegram. Os pacotes de vídeo chegarão aqui.'); res.json({ ok: true }); }
+  catch (e) { res.status(e.status || 502).json({ error: e.message }); }
+});
+app.post('/api/telegram/message', async (req, res) => {
+  try { if (tgLimit(res)) return; await telegram.sendMessage(telegram.formatProductMessage(req.body || {})); res.json({ ok: true }); }
+  catch (e) { res.status(e.status || 502).json({ error: e.message }); }
+});
 app.post('/api/telegram/send', async (req, res) => {
   try {
     if (Date.now() - tgUsage.start > 3600e3) { tgUsage.start = Date.now(); tgUsage.n = 0; }

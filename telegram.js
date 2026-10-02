@@ -41,3 +41,23 @@ export async function sendVideo({ buffer, caption }) {
   await call('sendVideo', form, true);
   return true;
 }
+
+export async function sendMessage(text) {
+  if (!isConfigured()) throw fail('Telegram não configurado (TELEGRAM_BOT_TOKEN e TELEGRAM_CHAT_ID)', 503);
+  await call('sendMessage', { chat_id: TELEGRAM_CHAT_ID, text: String(text).slice(0, 3500) });
+  return true;
+}
+
+const money = (n) => `R$ ${Number(n).toFixed(2).replace('.', ',')}`;
+export function formatProductMessage({ product = {}, caption = '' }) {
+  const p = product, lines = [];
+  if (p.name) lines.push(`📦 ${String(p.name).slice(0, 200)}`);
+  if (Number.isFinite(Number(p.sale)) && Number(p.sale) > 0) {
+    const old = Number(p.old) > Number(p.sale) ? ` (de ${money(p.old)})` : '';
+    lines.push(`💰 ${money(p.sale)}${old}`);
+  }
+  if (Number.isFinite(Number(p.commission)) && Number(p.commission) > 0) lines.push(`📈 Comissão: ${Number(p.commission)}%`);
+  if (caption) lines.push('', String(caption).slice(0, 650));
+  if (/^https:\/\/\S+$/.test(String(p.affiliateUrl || ''))) lines.push('', `🔗 ${String(p.affiliateUrl).slice(0, 300)}`);
+  return lines.join('\n');
+}
