@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AfiliadoFlow – Central Shopee</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f4f5fa;--card:#fff;--tx:#1b1d2e;--mu:#6b7090;--bd:#e7e9f3;--pr:#5b5bf0;--pr2:#8b5cf6;--ok:#10a36b;--okb:#e3f7ef;--er:#e5484d;--erb:#fdeaea;--wb:#fff4dc;--wt:#a56a00;--sh:0 2px 10px rgba(40,40,90,.06)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12131c;--card:#1b1d2b;--tx:#eceefa;--mu:#9aa0c3;--bd:#2a2d41;--okb:#12362a;--erb:#3a1a1c;--wb:#3a2f12;--wt:#f0c060;--sh:none}}
+:root[data-theme="dark"]{--bg:#12131c;--card:#1b1d2b;--tx:#eceefa;--mu:#9aa0c3;--bd:#2a2d41;--okb:#12362a;--erb:#3a1a1c;--wb:#3a2f12;--wt:#f0c060;--sh:none}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 Inter,system-ui,sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+#app{display:flex;min-height:100vh}
+aside{width:236px;background:var(--card);border-right:1px solid var(--bd);padding:20px 14px;position:sticky;top:0;height:100vh;flex-shrink:0;transition:transform .25s;z-index:20}
+.logo{font-weight:800;font-size:19px;display:flex;gap:10px;align-items:center;padding:4px 10px 22px}
+.logo i{background:linear-gradient(135deg,var(--pr),var(--pr2));color:#fff;border-radius:10px;width:32px;height:32px;display:grid;place-items:center;font-style:normal}
+.nav{display:flex;gap:10px;align-items:center;width:100%;border:0;background:none;padding:10px 12px;border-radius:12px;color:var(--mu);cursor:pointer;text-align:left;margin-bottom:2px}
+.nav:hover{background:var(--bg)}.nav.on{background:linear-gradient(135deg,var(--pr),var(--pr2));color:#fff;font-weight:600}
+main{flex:1;min-width:0}
+header{display:flex;gap:12px;align-items:center;padding:16px 28px;position:sticky;top:0;background:var(--bg);z-index:10}
+.search{flex:1;max-width:420px;border:1px solid var(--bd);background:var(--card);border-radius:12px;padding:9px 14px}
+.menu{display:none}
+.av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--pr2),var(--pr));color:#fff;display:grid;place-items:center;font-weight:700}
+.ib{border:1px solid var(--bd);background:var(--card);border-radius:12px;width:38px;height:38px;cursor:pointer}
+.btn{border:0;border-radius:12px;padding:9px 16px;cursor:pointer;font-weight:600;background:linear-gradient(135deg,var(--pr),var(--pr2));color:#fff}
+.btn.sec{background:var(--card);color:var(--tx);border:1px solid var(--bd)}.btn.sm{padding:6px 12px;font-size:13px}
+.wrap{padding:6px 28px 40px;max-width:1280px}
+h1{font-size:24px;margin:6px 0 4px}.sub{color:var(--mu);margin:0 0 22px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:18px;padding:20px;box-shadow:var(--sh)}
+.grid{display:grid;gap:18px}.g4{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}.g3{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.met b{font-size:26px;display:block}.met span{color:var(--mu);font-size:13px}
+.img{aspect-ratio:1;border-radius:14px;display:grid;place-items:center;font-size:54px}.img.s{width:48px;aspect-ratio:1;font-size:24px;border-radius:10px;flex-shrink:0}
+.tag{display:inline-block;padding:2px 10px;border-radius:99px;font-size:12px;font-weight:600;background:var(--okb);color:var(--ok)}
+.tag.w{background:var(--wb);color:var(--wt)}.tag.e{background:var(--erb);color:var(--er)}.tag.b{background:var(--bg);color:var(--pr)}
+.old{text-decoration:line-through;color:var(--mu);font-size:13px}.price{font-size:20px;font-weight:800;color:var(--pr)}
+.row{display:flex;gap:12px;align-items:center}.sp{justify-content:space-between}.wr{flex-wrap:wrap}
+table{width:100%;border-collapse:collapse}td,th{padding:12px 8px;border-bottom:1px solid var(--bd);text-align:left;font-size:14px}th{color:var(--mu);font-weight:600;font-size:12px}
+.tw{overflow-x:auto}
+.chip{border:1px solid var(--bd);background:var(--card);border-radius:99px;padding:7px 14px;cursor:pointer;margin:0 6px 8px 0}.chip.on{background:var(--pr);color:#fff;border-color:var(--pr)}
+.fi{border:1px solid var(--bd);background:var(--card);border-radius:12px;padding:9px 12px}
+.steps{display:flex;gap:6px;margin-bottom:22px;overflow-x:auto}.st{flex:1;min-width:90px;text-align:center;padding:8px;border-radius:12px;background:var(--card);border:1px solid var(--bd);color:var(--mu);font-size:13px}.st.on{border-color:var(--pr);color:var(--pr);font-weight:700}.st.dn{background:var(--okb);color:var(--ok)}
+textarea{width:100%;min-height:200px;border:1px solid var(--bd);border-radius:14px;padding:14px;background:var(--bg);resize:vertical}
+.bar{height:10px;border-radius:9px;background:var(--bg);overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--pr),var(--pr2));transition:width .3s}
+.spin{width:44px;height:44px;border:4px solid var(--bd);border-top-color:var(--pr);border-radius:50%;animation:r 1s linear infinite;margin:auto}@keyframes r{to{transform:rotate(360deg)}}
+.vid{aspect-ratio:9/16;max-height:420px;margin:auto;border-radius:18px;background:linear-gradient(160deg,#2a2a6a,#8b5cf6);display:grid;place-items:center;color:#fff;font-size:60px;cursor:pointer}
+.sc{position:fixed;inset:0;background:#0006;z-index:15;display:none}
+@media(max-width:860px){aside{position:fixed;transform:translateX(-100%)}aside.open{transform:none}.sc.open{display:block}.menu{display:block}header,.wrap{padding-left:16px;padding-right:16px}.hq{display:none}}
+</style></head><body>
+<div id="app"><aside id="sb"><div class="logo"><i>▶</i>AfiliadoFlow</div><div id="nav"></div></aside><div class="sc" id="sc" onclick="tog()"></div>
+<main><header><button class="ib menu" onclick="tog()">☰</button><input class="search" placeholder="Buscar produtos, vídeos…" oninput="S.q=this.value;S.pg=1;if(S.page!='produtos'&&S.page!='promocoes')go('produtos')"><span class="ib hq" style="display:grid;place-items:center">🔔</span><button class="btn hq" onclick="startVideo(P[0])">＋ Novo vídeo</button><div class="av">M</div></header>
+<div class="wrap" id="v"></div></main></div>
+<script>
+/* ===== Services (mocks) — trocar por chamadas ao backend (/api/...) ===== */
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+const shopeeService={async importProducts(){
+const r=await fetch('/api/products?limit=20');const j=await r.json();if(!r.ok)throw new Error(j.error||'Falha ao importar');
+const hoje=new Date().toISOString().slice(0,10);
+const novos=j.items.map((x,i)=>({id:i+1,name:x.name,category:'Shopee',img:x.image,c1:'#e7e9f3',c2:'#cfd3ea',e:'🛍️',old:x.originalPrice,sale:x.salePrice,commission:Math.round(x.commission*10)/10,description:'Produto importado da Shopee.',affiliateUrl:x.affiliateUrl,createdAt:hoje,status:'Ativo'}));
+if(novos.length){P.splice(0,P.length,...novos);S.sel=P[0]}return P}};
+const openaiService={async generateVideoPrompt(p,s){/* TODO: backend → OpenAI */await wait(900);
+return `Crie um vídeo ${s.fmt=='9:16'?'vertical':s.fmt=='16:9'?'horizontal':'quadrado'} de ${s.dur} para divulgação de: ${p.name}.\n\nComece mostrando o produto em um ambiente real. Mostre uma pessoa usando o produto e depois apresente o resultado final.\n\nDestaque a praticidade e o desconto de ${disc(p)}% (de ${fmt(p.old)} por ${fmt(p.sale)}).\n\nEstilo ${s.style}, tom ${s.tone.toLowerCase()}, voz: ${s.voice.toLowerCase()}, idioma ${s.lang}, legendas ${s.subs.toLowerCase()}. Iluminação natural, câmera dinâmica e cortes rápidos.\n\nFinalize mostrando o produto, o preço promocional e uma chamada para ação.`}};
+const videoService={async generateVideo(prompt,s){/* TODO: backend → provedor de vídeo */await wait(300);return{id:'job_'+Date.now()}}};
+/* ===== Modelos (User, Product, Promotion, Video, VideoGeneration, Content, ApiIntegration) ===== */
+const P=[
+['Air Fryer 5L Digital','Cozinha','🍳','#ffb88c','#de6262',399.9,229.9,12],['Fone Bluetooth TWS','Eletrônicos','🎧','#a8c0ff','#3f2b96',159.9,69.9,10],
+['Luminária LED de Mesa','Casa','💡','#fceabb','#f8b500',89.9,44.9,9],['Kit Skincare Vitamina C','Beleza','🧴','#fbc2eb','#a6c1ee',179.9,99.9,14],
+['Mochila Antifurto USB','Acessórios','🎒','#84fab0','#8fd3f4',219.9,119.9,11],['Mouse Gamer RGB','Informática','🖱️','#cfd9df','#6a85b6',129.9,64.9,8],
+['Organizador de Cozinha','Casa','🧺','#ffecd2','#fcb69f',79.9,39.9,13],['Smartwatch Fit Pro','Eletrônicos','⌚','#e0c3fc','#8ec5fc',299.9,149.9,10]
+].map((a,i)=>({id:i+1,name:a[0],category:a[1],e:a[2],c1:a[3],c2:a[4],old:a[5],sale:a[6],commission:a[7],description:'Produto popular na Shopee com ótima avaliação e entrega rápida.',affiliateUrl:'https://shope.ee/xxxx'+(i+1),createdAt:'2026-09-'+String(20+i).padStart(2,'0'),status:i==6?'Pausado':'Ativo'}));
+let V=[{id:1,pid:1,st:'COMPLETED',dur:'15s',fmt:'9:16',at:'30/09/2026',plat:'TikTok'},{id:2,pid:2,st:'PROCESSING',dur:'30s',fmt:'9:16',at:'01/10/2026',plat:'Reels'},{id:3,pid:5,st:'FAILED',dur:'15s',fmt:'1:1',at:'01/10/2026',plat:'Shorts'},{id:4,pid:8,st:'COMPLETED',dur:'60s',fmt:'16:9',at:'29/09/2026',plat:'YouTube'}];
+let C=[{pid:3,title:'Luz perfeita pro home office',cap:'Achei a luminária ideal! 💡',tags:'#shopee #achadinhos #casa',status:'Pronto'}];
+/* ===== Estado ===== */
+const S={page:'dashboard',q:'',cat:'Todas',sort:'desconto',pg:1,vf:'Todos',pf:'desconto',step:0,sel:P[0],prompt:'',busy:false,gen:null,
+cfg:{fmt:'9:16',dur:'15 segundos',style:'UGC',voice:'Feminina',lang:'Português brasileiro',subs:'Ativadas',tone:'Persuasivo'}};
+const OPT={fmt:['9:16','16:9','1:1'],dur:['15 segundos','30 segundos','60 segundos'],style:['UGC','Comercial','Demonstração','Review','Oferta viral'],voice:['Masculina','Feminina','Sem narração'],lang:['Português brasileiro'],subs:['Ativadas','Desativadas'],tone:['Persuasivo','Informativo','Urgente','Casual']};
+const LBL={fmt:'Formato',dur:'Duração',style:'Estilo',voice:'Voz',lang:'Idioma',subs:'Legendas',tone:'Tom'};
+const NAV=[['dashboard','📊','Dashboard'],['produtos','📦','Produtos'],['promocoes','🔥','Promoções'],['criar','🎬','Criar Vídeo'],['videos','🎞️','Vídeos Gerados'],['conteudos','📝','Conteúdos'],['config','⚙️','Configurações']];
+const fmt=n=>'R$ '+n.toFixed(2).replace('.',','),disc=p=>Math.round((1-p.sale/p.old)*100),com=p=>fmt(p.sale*p.commission/100);
+const $=id=>document.getElementById(id),pimg=(p,c='')=>`<div class="img ${c}" style="background:${p.img?`center/cover url('${p.img}')`:`linear-gradient(135deg,${p.c1},${p.c2})`}">${p.img?'':p.e}</div>`;
+const pname=id=>(P.find(p=>p.id==id)||{}).name;
+const stTag=s=>`<span class="tag ${s=='COMPLETED'?'':s=='FAILED'?'e':'w'}">${{COMPLETED:'Concluído',FAILED:'Falhou',PROCESSING:'Processando',QUEUED:'Na fila'}[s]}</span>`;
+function tog(){$('sb').classList.toggle('open');$('sc').classList.toggle('open')}
+function go(p){S.page=p;$('sb').classList.remove('open');$('sc').classList.remove('open');render()}
+function startVideo(p){S.sel=p;S.step=0;S.prompt='';S.gen=null;go('criar')}
+function filtered(){let l=P.filter(p=>(S.cat=='Todas'||p.category==S.cat)&&p.name.toLowerCase().includes(S.q.toLowerCase()));
+const k={desconto:p=>-disc(p),comissao:p=>-p.commission,recentes:p=>-p.id,preco:p=>p.sale}[S.sort];return l.sort((a,b)=>k(a)-k(b))}
+const cats=['Todas',...new Set(P.map(p=>p.category))];
+const catSel=()=>`<select class="fi" onchange="S.cat=this.value;S.pg=1;render()">${cats.map(c=>`<option ${c==S.cat?'selected':''}>${c}</option>`).join('')}</select>`;
+const sortSel=()=>`<select class="fi" onchange="S.sort=this.value;render()">${[['desconto','Maior desconto'],['comissao','Maior comissão'],['recentes','Mais recentes'],['preco','Menor preço']].map(o=>`<option value="${o[0]}" ${o[0]==S.sort?'selected':''}>${o[1]}</option>`).join('')}</select>`;
+const head=(t,s,a='')=>`<div class="row sp wr"><div><h1>${t}</h1><p class="sub">${s}</p></div>${a}</div>`;
+function chart(){const d={Cliques:[40,55,48,70,66,90,110],Vídeos:[2,3,3,5,4,7,8],Produtos:[5,6,8,8,10,12,14],Vendas:[3,5,4,8,9,12,15]},col=['#5b5bf0','#8b5cf6','#10a36b','#f0a020'];
+let s='',i=0;for(const k in d){const m=Math.max(...d[k]);s+=`<polyline fill="none" stroke="${col[i]}" stroke-width="3" stroke-linecap="round" points="${d[k].map((v,j)=>(20+j*93)+','+(170-v/m*150)).join(' ')}"/>`;i++}
+return `<svg viewBox="0 0 660 190" width="100%"><g stroke="var(--bd)">${[20,70,120,170].map(y=>`<line x1="10" x2="650" y1="${y}" y2="${y}"/>`).join('')}</g>${s}</svg><div class="row wr" style="font-size:13px;color:var(--mu)">${Object.keys(d).map((k,i)=>`<span><b style="color:${col[i]}">●</b> ${k}</span>`).join('')}<span>(últimos 7 dias, dados fictícios)</span></div>`}
+const VIEWS={
+dashboard(){return head('Dashboard','Visão geral da sua operação de afiliado')+`<div class="grid g4">${[['Produtos importados',P.length,'📦'],['Promoções encontradas',P.filter(p=>disc(p)>=45).length,'🔥'],['Vídeos gerados',V.filter(v=>v.st=='COMPLETED').length,'🎞️'],['Em processamento',V.filter(v=>v.st=='PROCESSING').length,'⏳'],['Comissão estimada','R$ 1.284,50','💰']].map(m=>`<div class="card met"><span>${m[2]} ${m[0]}</span><b>${m[1]}</b></div>`).join('')}</div>
+<div class="card" style="margin:18px 0"><b>Desempenho</b>${chart()}</div>
+<div class="card"><div class="row sp"><b>Promoções recentes</b><button class="btn sec sm" onclick="go('promocoes')">Ver todas</button></div><div class="tw"><table><tr><th>Produto<th>De<th>Por<th>Desc.<th>Comissão<th>Status<th></tr>${P.slice(0,5).map(p=>`<tr><td><div class="row">${pimg(p,'s')}${p.name}</div><td class="old">${fmt(p.old)}<td><b>${fmt(p.sale)}</b><td><span class="tag">-${disc(p)}%</span><td>${p.commission}% · ${com(p)}<td><span class="tag b">${p.status}</span><td><button class="btn sm" onclick="startVideo(P[${p.id-1}])">Criar vídeo</button></tr>`).join('')}</table></div></div>`},
+produtos(){const l=filtered(),n=5,pages=Math.max(1,Math.ceil(l.length/n)),pg=Math.min(S.pg,pages);
+return head('Produtos','Catálogo importado da Shopee',`<button class="btn" id="imp" onclick="doImport()">⬇ Importar produtos</button>`)+`<div class="row wr" style="margin-bottom:16px">${catSel()}${sortSel()}<span class="sub" style="margin:0">${l.length} produto(s)</span></div><div class="card tw"><table><tr><th>Produto<th>Categoria<th>Preço<th>Promo<th>Desc.<th>Comissão<th>Afiliado<th>Importado<th>Status</tr>${l.slice((pg-1)*n,pg*n).map(p=>`<tr><td><div class="row">${pimg(p,'s')}<b>${p.name}</b></div><td>${p.category}<td class="old">${fmt(p.old)}<td><b>${fmt(p.sale)}</b><td><span class="tag">-${disc(p)}%</span><td>${p.commission}%<td><a href="#" style="color:var(--pr)" onclick="return false">${p.affiliateUrl.slice(8)}</a><td>${p.createdAt.split('-').reverse().join('/')}<td><span class="tag ${p.status=='Ativo'?'':'w'}">${p.status}</span></tr>`).join('')||'<tr><td colspan=9>Nada encontrado.</tr>'}</table></div>
+<div class="row" style="justify-content:center;margin-top:16px"><button class="btn sec sm" onclick="S.pg=${Math.max(1,pg-1)};render()">‹</button>Página ${pg} de ${pages}<button class="btn sec sm" onclick="S.pg=${Math.min(pages,pg+1)};render()">›</button></div>`},
+promocoes(){const l=filtered();return head('Promoções','As melhores ofertas para divulgar hoje')+`<div class="row wr" style="margin-bottom:16px">${catSel()}${sortSel()}</div><div class="grid g3">${l.map(p=>`<div class="card">${pimg(p)}<div style="margin:14px 0 4px"><span class="tag">-${disc(p)}% OFF</span> <span class="tag b">${p.commission}% comissão</span></div><b>${p.name}</b><div class="old">${fmt(p.old)}</div><div class="price">${fmt(p.sale)}</div><div class="row" style="margin-top:12px"><button class="btn sm" style="flex:1" onclick="startVideo(P[${p.id-1}])">Criar vídeo</button><button class="btn sec sm" onclick="alert('Abriria: ${p.affiliateUrl}')">Ver produto</button></div></div>`).join('')}</div>`},
+criar(){const p=S.sel,sn=['Produto','Configuração','Prompt','Geração','Resultado'];
+let b='';
+if(S.step==0)b=`<div class="row wr" style="align-items:flex-start"><div style="width:180px">${pimg(p)}</div><div style="flex:1;min-width:220px"><select class="fi" onchange="S.sel=P[this.value-1];render()">${P.map(x=>`<option value="${x.id}" ${x.id==p.id?'selected':''}>${x.name}</option>`).join('')}</select><h2 style="margin:12px 0 4px">${p.name}</h2><p class="sub" style="margin:0 0 10px">${p.description}</p><span class="old">${fmt(p.old)}</span> <span class="price">${fmt(p.sale)}</span> <span class="tag">-${disc(p)}%</span> <span class="tag b">Comissão ${p.commission}% (${com(p)})</span></div></div>`;
+if(S.step==1)b=Object.keys(OPT).map(k=>`<div><b style="font-size:13px;color:var(--mu)">${LBL[k]}</b><div style="margin:6px 0 10px">${OPT[k].map(o=>`<button class="chip ${S.cfg[k]==o?'on':''}" onclick="S.cfg.${k}='${o}';render()">${o}</button>`).join('')}</div></div>`).join('');
+if(S.step==2)b=`<div class="row wr" style="margin-bottom:12px"><button class="btn sm" onclick="genPrompt()">${S.prompt?'↻ Regenerar':'✨ Gerar prompt com IA'}</button><button class="btn sec sm" onclick="$('pr').readOnly=false;$('pr').focus()">✎ Editar prompt</button><button class="btn sec sm" onclick="navigator.clipboard&&navigator.clipboard.writeText($('pr').value)">⧉ Copiar prompt</button></div>${S.busy?'<div class="spin"></div><p class="sub" style="text-align:center">A IA está escrevendo o roteiro…</p>':`<textarea id="pr" readonly oninput="S.prompt=this.value" placeholder="O prompt gerado pela IA aparecerá aqui.">${S.prompt}</textarea>`}`;
+if(S.step==3){const g=S.gen||{pct:0,status:'QUEUED'};b=`<div style="text-align:center;padding:20px"><div class="spin"></div><h2>${g.status=='FAILED'?'Falha na geração':'Preparando seu vídeo…'}</h2>${stTag(g.status)}<div class="bar" style="margin:18px auto;max-width:420px"><i style="width:${g.pct}%"></i></div><p class="sub">${g.pct}% · ${g.pct<15?'Na fila':g.pct<55?'Gerando cenas':g.pct<90?'Renderizando e legendando':'Finalizando'} · estimativa ${Math.max(1,Math.round((100-g.pct)/12))}s</p></div>`}
+if(S.step==4)b=`<div class="row wr" style="align-items:flex-start;justify-content:center;gap:28px"><div style="width:230px"><div class="vid" onclick="alert('Aqui tocará o vídeo real (videoUrl).')">▶</div></div><div style="flex:1;min-width:240px"><h2 style="margin-top:0">${p.name}</h2>${stTag('COMPLETED')}<table><tr><td>Duração<td>${S.cfg.dur}<tr><td>Formato<td>${S.cfg.fmt}<tr><td>Criado em<td>${new Date().toLocaleDateString('pt-BR')}<tr><td>Produto<td>${p.name}</table><div class="row wr" style="margin-top:14px"><button class="btn" onclick="alert('Reproduzindo (mock)')">▶ Assistir</button><button class="btn sec" onclick="dl()">⬇ Baixar vídeo</button><button class="btn sec" onclick="runGen()">↻ Gerar novamente</button><button class="btn sec" onclick="S.step=2;render()">✎ Editar prompt</button><button class="btn sec" onclick="S.step=0;S.prompt='';go('promocoes')">Novo vídeo</button></div></div></div>`;
+const nav=S.step<3?`<div class="row sp" style="margin-top:20px"><button class="btn sec" ${S.step?'':'disabled'} onclick="S.step--;render()">Voltar</button><button class="btn" ${S.step==2&&!S.prompt?'disabled':''} onclick="next()">${S.step==2?'🎬 Confirmar e gerar vídeo':'Continuar'}</button></div>`:'';
+return head('Criar Vídeo','Do produto ao vídeo em poucos passos')+`<div class="steps">${sn.map((s,i)=>`<div class="st ${i==S.step?'on':i<S.step?'dn':''}">${i<S.step?'✓':i+1}. ${s}</div>`).join('')}</div><div class="card">${b}${nav}</div>`},
+videos(){const l=V.filter(v=>S.vf=='Todos'||({Processando:'PROCESSING',Concluídos:'COMPLETED',Falharam:'FAILED'}[S.vf]==v.st));return head('Vídeos Gerados','Sua biblioteca de vídeos')+`<div style="margin-bottom:10px">${['Todos','Processando','Concluídos','Falharam'].map(f=>`<button class="chip ${S.vf==f?'on':''}" onclick="S.vf='${f}';render()">${f}</button>`).join('')}</div><div class="grid g3">${l.map(v=>{const p=P[v.pid-1];return `<div class="card">${pimg(p)}<div class="row sp" style="margin:12px 0 4px"><b>${p.name}</b>${stTag(v.st)}</div><div class="sub" style="margin:0 0 10px;font-size:13px">${v.at} · ${v.dur} · ${v.fmt} · ${v.plat}</div><button class="btn sec sm" onclick="alert('Visualizar vídeo (mock)')">Visualizar</button></div>`}).join('')||'<p class="sub">Nenhum vídeo.</p>'}</div>`},
+conteudos(){return head('Conteúdos','Legendas, roteiros e prompts por produto',`<button class="btn" onclick="C.unshift({pid:S.sel.id,title:'Achadinho: '+S.sel.name,cap:'Olha esse achado com '+disc(S.sel)+'% OFF! 🔥',tags:'#shopee #achadinhos #oferta',status:'Rascunho'});render()">✨ Gerar conteúdo com IA</button>`)+`<div class="grid g3">${C.map(c=>`<div class="card"><div class="row sp"><b>${c.title}</b><span class="tag ${c.status=='Pronto'?'':'w'}">${c.status}</span></div><p class="sub" style="margin:6px 0">${pname(c.pid)}</p><p>${c.cap}</p><p style="color:var(--pr)">${c.tags}</p><span class="tag b">Roteiro</span> <span class="tag b">Prompt de vídeo</span></div>`).join('')}</div>`},
+config(){const box=(t,i,rows)=>`<div class="card"><div class="row sp"><b>${i} ${t}</b><span class="tag w">Não conectado</span></div><table>${rows.map(r=>`<tr><td style="color:var(--mu)">${r[0]}<td>${r[1]}`).join('')}</table></div>`;
+return head('Configurações','Integrações — chaves ficam só no servidor')+`<div class="grid g3">${box('Shopee','🛍️',[['API configurada','Não'],['Chave','••••••••••••1234'],['Última sincronização','—'],['',`<button class="btn sm" onclick="alert('Conectar via backend (a implementar)')">Conectar</button>`]])}${box('OpenAI','🤖',[['Modelo','a definir'],['Chave','••••••••••••5678'],['',`<button class="btn sm" onclick="alert('Teste via backend (a implementar)')">Testar conexão</button>`]])}${box('IA de vídeo','🎥',[['Provedor','a definir'],['Modelo','a definir'],['Chave','••••••••••••9012'],['',`<button class="btn sm" onclick="alert('Teste via backend (a implementar)')">Testar conexão</button>`]])}</div>`}};
+async function doImport(){const b=$('imp');b.textContent='Importando…';try{await shopeeService.importProducts();b.textContent='✓ Importado';S.pg=1;setTimeout(render,700);return}catch(e){alert(e.message);b.textContent='⬇ Importar produtos';return}}
+async function genPrompt(){S.busy=true;render();S.prompt=await openaiService.generateVideoPrompt(S.sel,S.cfg);S.busy=false;render();$('pr').readOnly=true}
+function next(){if(S.step==2)return runGen();S.step++;render()}
+async function runGen(){S.step=3;S.gen={pct:0,status:'QUEUED'};render();const job=await videoService.generateVideo(S.prompt,S.cfg);
+const t=setInterval(()=>{S.gen.pct=Math.min(100,S.gen.pct+8+Math.random()*8|0);S.gen.status=S.gen.pct>=100?'COMPLETED':S.gen.pct>12?'PROCESSING':'QUEUED';
+if(S.gen.pct>=100){clearInterval(t);V.unshift({id:Date.now(),pid:S.sel.id,st:'COMPLETED',dur:S.cfg.dur.slice(0,3).trim()+'s',fmt:S.cfg.fmt,at:new Date().toLocaleDateString('pt-BR'),plat:'TikTok'});S.step=4}
+if(S.page=='criar')render()},600)}
+function dl(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['Vídeo mock: '+S.sel.name+'\n\n'+S.prompt]));a.download='video-mock.txt';a.click()}
+function render(){$('nav').innerHTML=NAV.map(n=>`<button class="nav ${S.page==n[0]?'on':''}" onclick="go('${n[0]}')">${n[1]} ${n[2]}</button>`).join('');
+const keep=document.activeElement&&document.activeElement.id=='pr';$('v').innerHTML=VIEWS[S.page]();if(S.step==2&&S.page=='criar'&&$('pr'))$('pr').oninput=e=>S.prompt=e.target.value}
+render();
+</script></body></html>

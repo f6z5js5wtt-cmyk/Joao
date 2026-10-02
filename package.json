@@ -1,0 +1,1 @@
+{"name":"afiliadoflow-backend","version":"0.1.0","type":"module","scripts":{"start":"node --env-file-if-exists=.env server.js"},"dependencies":{"express":"^4.19.2","cors":"^2.8.5"},"engines":{"node":">=22.9"}}
