@@ -61,3 +61,10 @@ export function formatProductMessage({ product = {}, caption = '' }) {
   if (/^https:\/\/\S+$/.test(String(p.affiliateUrl || ''))) lines.push('', `🔗 ${String(p.affiliateUrl).slice(0, 300)}`);
   return lines.join('\n');
 }
+
+export async function sendPhoto({ photoUrl, caption }) {
+  if (!isConfigured()) throw fail('Telegram não configurado (TELEGRAM_BOT_TOKEN e TELEGRAM_CHAT_ID)', 503);
+  if (!/^https:\/\/\S+$/.test(String(photoUrl || ''))) throw fail('Endereço de imagem inválido', 400);
+  await call('sendPhoto', { chat_id: TELEGRAM_CHAT_ID, photo: photoUrl, caption: String(caption || '').slice(0, 1000) });
+  return true;
+}

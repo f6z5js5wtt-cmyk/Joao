@@ -4,6 +4,8 @@ import * as shopee from './shopee.js';
 import * as openai from './openai.js';
 import * as video from './video.js';
 import * as telegram from './telegram.js';
+import * as auto from './auto.js';
+import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 
 const app = express();
@@ -105,6 +107,31 @@ app.post('/api/telegram/send', async (req, res) => {
     await telegram.sendVideo({ buffer, caption: `${String(caption || '').slice(0, 650)}${url}` });
     res.json({ ok: true });
   } catch (e) { res.status(e.status || 502).json({ error: e.message }); }
+});
+
+// ===== Automação =====
+const okKey = (k) => {
+  const s = process.env.AUTO_SECRET || '';
+  if (!s || !k) return false;
+  const a = Buffer.from(String(k)), b = Buffer.from(s);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+};
+app.get('/api/ping', (_req, res) => res.json({ ok: true }));
+app.get('/api/auto/status', (_req, res) => res.json({ secretSet: Boolean(process.env.AUTO_SECRET), running: auto.isRunning(), last: auto.state.last }));
+app.all('/api/auto/run', (req, res) => {
+  if (!process.env.AUTO_SECRET) return res.status(503).json({ error: 'AUTO_SECRET não configurado no servidor' });
+  if (!okKey(req.query.key || req.headers['x-auto-key'])) return res.status(401).json({ error: 'Chave inválida' });
+  if (auto.isRunning()) return res.status(409).json({ error: 'Já está em execução' });
+  res.status(202).json({ started: true });
+  auto.run({ source: 'cron' });
+});
+const runNow = { start: Date.now(), n: 0 };
+app.post('/api/auto/run-now', (_req, res) => {
+  if (Date.now() - runNow.start > 3600e3) { runNow.start = Date.now(); runNow.n = 0; }
+  if (++runNow.n > 5) return res.status(429).json({ error: 'Limite de execuções por hora atingido' });
+  if (auto.isRunning()) return res.status(409).json({ error: 'Já está em execução' });
+  res.status(202).json({ started: true });
+  auto.run({ source: 'painel' });
 });
 
 app.get('/',(_req,res)=>res.sendFile(fileURLToPath(new URL('./index.html',import.meta.url))));
