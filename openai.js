@@ -73,6 +73,17 @@ ${EXEMPLO}`;
   return fit(text);
 }
 
+// Remove frases de chamada para ação ("link abaixo", "clique aqui"...) e deixa só descrição + hashtags
+const CTA = /(link|clique|clica|acesse|toque|garanta|compre)[^.!?\n]*?(abaixo|aqui|na bio|no perfil|na descri[çc][ãa]o|nos coment[áa]rios)|link (do produto|abaixo)|👇|⬇️/i;
+export function cleanCaption(text) {
+  const tag = /#[\p{L}\p{N}_]+/gu;
+  const tags = [...new Set(text.match(tag) || [])];
+  const body = text.replace(tag, ' ')
+    .split(/(?<=[.!?])\s+|\n+/).map((x) => x.trim()).filter(Boolean)
+    .filter((x) => !CTA.test(x)).join(' ');
+  return [body, tags.join(' ')].filter(Boolean).join('\n\n').slice(0, 600);
+}
+
 export async function generateCaption({ product = {} }) {
   if (!isConfigured()) {
     const e = new Error('OPENAI_API_KEY não configurada no servidor');
@@ -81,10 +92,10 @@ export async function generateCaption({ product = {} }) {
   }
   const info = { produto: clip(product.name, 200), categoria: product.category && product.category !== 'Shopee' ? clip(product.category, 80) : '' };
   const ask = `Escreva a legenda de um vídeo curto de afiliado na Shopee Vídeo sobre este produto: ${JSON.stringify(info)}.
-Regras: português do Brasil; no máximo 300 caracteres no total, contando as hashtags; comece com uma frase de gancho curta; cite no máximo 2 benefícios que decorram do nome do produto, sem inventar especificações, resultados, preços ou promessas; termine com uma chamada para ação como "Link do produto abaixo"; inclua de 5 a 7 hashtags relevantes (por exemplo #shopee #achadinhos). Responda só com a legenda.`;
+Regras: português do Brasil; no máximo 300 caracteres no total, contando as hashtags; comece com uma frase de gancho curta; cite no máximo 2 benefícios que decorram do nome do produto, sem inventar especificações, resultados, preços ou promessas; NÃO inclua chamada para ação nem frases como "link abaixo", "clique", "acesse" ou "garanta"; termine com de 5 a 7 hashtags relevantes (por exemplo #shopee #achadinhos). Responda só com a legenda.`;
   const text = await chat([
     { role: 'system', content: 'Você escreve legendas curtas de redes sociais em português do Brasil. Responda somente com o texto final.' },
     { role: 'user', content: ask },
   ]);
-  return text.slice(0, 600);
+  return cleanCaption(text);
 }
