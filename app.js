@@ -2,6 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import * as shopee from './shopee.js';
 import * as openai from './openai.js';
+import * as video from './video.js';
+import * as telegram from './telegram.js';
 import { fileURLToPath } from 'node:url';
 
 const app = express();
@@ -54,6 +56,42 @@ app.post('/api/prompt', async (req, res) => {
   if (++usage.n > LIMIT_PER_HOUR) return res.status(429).json({ error: 'Limite de prompts por hora atingido' });
   try { res.json({ prompt: await openai.generateVideoPrompt(req.body || {}) }); }
   catch (e) { res.status(e.status || 502).json({ error: e.message }); }
+});
+
+app.get('/api/video/status-config', (_req, res) => res.json({ configured: video.isConfigured(), model: video.modelName() }));
+app.get('/api/video/models', async (_req, res) => {
+  try { res.json(await video.listModels()); } catch (e) { res.status(e.status || 502).json({ error: e.message }); }
+});
+app.post('/api/video/start', async (req, res) => {
+  try { res.json(await video.start(req.body || {})); } catch (e) { res.status(e.status || 502).json({ error: e.message }); }
+});
+app.get('/api/video/status', async (req, res) => {
+  try { res.json(await video.status(String(req.query.id || ''))); } catch (e) { res.status(e.status || 502).json({ error: e.message }); }
+});
+app.get('/api/video/file', async (req, res) => {
+  try { const r = video.range(await video.file(String(req.query.id || '')), req.headers.range); res.status(r.status).set(r.headers).end(r.body); }
+  catch (e) { res.status(e.status || 502).json({ error: e.message }); }
+});
+
+app.post('/api/caption', async (req, res) => {
+  try { res.json({ caption: await openai.generateCaption(req.body || {}) }); }
+  catch (e) { res.status(e.status || 502).json({ error: e.message }); }
+});
+app.get('/api/telegram/status', (_req, res) => res.json({ configured: telegram.isConfigured() }));
+app.get('/api/telegram/chats', async (_req, res) => {
+  try { res.json(await telegram.listChats()); } catch (e) { res.status(e.status || 502).json({ error: e.message }); }
+});
+const tgUsage = { start: Date.now(), n: 0 };
+app.post('/api/telegram/send', async (req, res) => {
+  try {
+    if (Date.now() - tgUsage.start > 3600e3) { tgUsage.start = Date.now(); tgUsage.n = 0; }
+    if (++tgUsage.n > 20) return res.status(429).json({ error: 'Limite de envios por hora atingido' });
+    const { id, caption, link } = req.body || {};
+    const buffer = await video.file(String(id || ''));
+    const url = /^https:\/\/\S+$/.test(String(link || '')) ? `\n\n🔗 ${String(link).slice(0, 300)}` : '';
+    await telegram.sendVideo({ buffer, caption: `${String(caption || '').slice(0, 650)}${url}` });
+    res.json({ ok: true });
+  } catch (e) { res.status(e.status || 502).json({ error: e.message }); }
 });
 
 app.get('/',(_req,res)=>res.sendFile(fileURLToPath(new URL('./index.html',import.meta.url))));
