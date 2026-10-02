@@ -6,13 +6,18 @@ const fail = (message, status = 502) => Object.assign(new Error(message), { stat
 export const hasToken = () => Boolean(TELEGRAM_BOT_TOKEN);
 export const isConfigured = () => Boolean(TELEGRAM_BOT_TOKEN && TELEGRAM_CHAT_ID);
 
-async function call(method, body, isForm = false) {
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+async function call(method, body, isForm = false, retry = true) {
   const res = await fetch(`${API}/${method}`, {
     method: 'POST',
     ...(isForm ? { body } : { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }),
     signal: AbortSignal.timeout(120000),
   });
   const j = await res.json().catch(() => ({}));
+  if (res.status === 429 && retry) { // limite de envios: espera o tempo pedido e tenta de novo uma vez
+    await sleep(Math.min(30, Number(j?.parameters?.retry_after) || 2) * (process.env.TELEGRAM_RETRY_FAST ? 10 : 1000));
+    return call(method, body, isForm, false);
+  }
   if (!res.ok || !j.ok) throw fail(`Telegram: ${j.description || res.status}`);
   return j.result;
 }

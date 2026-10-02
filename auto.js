@@ -13,7 +13,7 @@ try { sent = new Set(JSON.parse(fs.readFileSync(SENT_FILE, 'utf8'))); } catch { 
 const saveSent = () => { try { fs.writeFileSync(SENT_FILE, JSON.stringify([...sent].slice(-500))); } catch { /* sem disco */ } };
 
 let running = false;
-export const state = { last: null };
+export const state = { last: null, progress: null };
 export const isRunning = () => running;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -30,7 +30,7 @@ async function makeVideo(p, prompt, head) {
 }
 
 // devolve true quando o produto ficou "completo" (com prompt) e pode ser marcado como enviado
-async function processProduct(p, report) {
+async function processProduct(p, report, { video: withVideo = true } = {}) {
   const product = { name: p.name, sale: p.salePrice, old: p.originalPrice, commission: p.commission, affiliateUrl: p.affiliateUrl };
   let prompt = '', caption = '';
   try { prompt = await openai.generateVideoPrompt({ product: { name: p.name } }); }
@@ -43,7 +43,7 @@ async function processProduct(p, report) {
   else await telegram.sendMessage(head);
   if (prompt) await telegram.sendMessage(prompt);
 
-  if (prompt && env('AUTO_VIDEO', 'false') === 'true' && video.isConfigured()) {
+  if (withVideo && prompt && env('AUTO_VIDEO', 'false') === 'true' && video.isConfigured()) {
     try { await makeVideo(p, prompt, info); } catch (e) { report.errors.push(e.message); }
   }
   return Boolean(prompt);
@@ -73,6 +73,42 @@ export async function run({ source = 'cron' } = {}) {
   } catch (e) {
     report.errors.push(e.message);
     try { await telegram.sendMessage(`⚠️ Automação falhou: ${e.message}`); } catch { /* sem Telegram */ }
-  } finally { running = false; state.last = report; }
+  } finally { running = false; state.progress = null; state.last = report; }
+  return report;
+}
+
+// Envio em lote: manda ao Telegram todos os produtos recebidos (foto + informações + legenda + prompt).
+// Não gera vídeo (evita custo) e não usa a lista de "já enviados".
+const BULK_MAX = () => Math.max(1, Number(env('AUTO_BULK_MAX', 30)));
+const https = (u) => (/^https:\/\/\S+$/.test(String(u || '')) ? String(u).slice(0, 500) : '');
+export function normalizeList(list) {
+  if (!Array.isArray(list)) return [];
+  return list.map((p) => ({
+    id: '', name: String(p?.name || '').slice(0, 200), category: String(p?.category || '').slice(0, 80),
+    image: https(p?.image), salePrice: Number(p?.salePrice) || 0, originalPrice: Number(p?.originalPrice) || 0,
+    commission: Number(p?.commission) || 0, affiliateUrl: https(p?.affiliateUrl),
+  })).filter((p) => p.name).slice(0, BULK_MAX());
+}
+
+export async function runList(list, { source = 'painel' } = {}) {
+  if (running) return { skipped: 'já está em execução' };
+  const items = normalizeList(list);
+  running = true;
+  const report = { at: new Date().toISOString(), source, products: items.length, sent: 0, errors: [], keyword: '(lista do painel)' };
+  state.progress = { done: 0, total: items.length };
+  try {
+    if (!telegram.isConfigured()) throw new Error('Telegram não configurado');
+    await telegram.sendMessage(`📦 Enviando ${items.length} produto(s) com foto, legenda e prompt do vídeo. Pode levar alguns minutos.`);
+    for (const p of items) {
+      try { await processProduct(p, report, { video: false }); report.sent++; }
+      catch (e) { report.errors.push(`${p.name.slice(0, 30)}: ${e.message}`); }
+      state.progress.done++;
+      await sleep(Number(env('AUTO_BULK_DELAY_MS', 1200)));
+    }
+    await telegram.sendMessage(`✅ Envio concluído: ${report.sent} de ${items.length} produto(s).${report.errors.length ? `\n⚠️ Avisos:\n- ${report.errors.slice(0, 5).join('\n- ')}` : ''}`).catch(() => {});
+  } catch (e) {
+    report.errors.push(e.message);
+    try { await telegram.sendMessage(`⚠️ Envio em lote falhou: ${e.message}`); } catch { /* sem Telegram */ }
+  } finally { running = false; state.progress = null; state.last = report; }
   return report;
 }

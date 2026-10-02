@@ -117,13 +117,23 @@ const okKey = (k) => {
   return a.length === b.length && crypto.timingSafeEqual(a, b);
 };
 app.get('/api/ping', (_req, res) => res.json({ ok: true }));
-app.get('/api/auto/status', (_req, res) => res.json({ secretSet: Boolean(process.env.AUTO_SECRET), running: auto.isRunning(), last: auto.state.last }));
+app.get('/api/auto/status', (_req, res) => res.json({ secretSet: Boolean(process.env.AUTO_SECRET), running: auto.isRunning(), progress: auto.state.progress, last: auto.state.last }));
 app.all('/api/auto/run', (req, res) => {
   if (!process.env.AUTO_SECRET) return res.status(503).json({ error: 'AUTO_SECRET não configurado no servidor' });
   if (!okKey(req.query.key || req.headers['x-auto-key'])) return res.status(401).json({ error: 'Chave inválida' });
   if (auto.isRunning()) return res.status(409).json({ error: 'Já está em execução' });
   res.status(202).json({ started: true });
   auto.run({ source: 'cron' });
+});
+const bulk = { start: Date.now(), n: 0 };
+app.post('/api/auto/send-list', (req, res) => {
+  if (Date.now() - bulk.start > 3600e3) { bulk.start = Date.now(); bulk.n = 0; }
+  if (++bulk.n > 3) return res.status(429).json({ error: 'Limite de envios em lote por hora atingido' });
+  if (auto.isRunning()) return res.status(409).json({ error: 'Já está em execução' });
+  const items = auto.normalizeList((req.body || {}).products);
+  if (!items.length) return res.status(400).json({ error: 'Nenhum produto válido para enviar' });
+  res.status(202).json({ started: true, total: items.length });
+  auto.runList(items, { source: 'painel (lote)' }).catch(() => {});
 });
 const runNow = { start: Date.now(), n: 0 };
 app.post('/api/auto/run-now', (_req, res) => {
