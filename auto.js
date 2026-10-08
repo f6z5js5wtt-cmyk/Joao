@@ -3,7 +3,7 @@
 import fs from 'node:fs';
 import * as shopee from './shopee.js';
 import * as openai from './openai.js';
-import * as video from './video.js';
+import * as video from './videoProvider.js';
 import * as telegram from './telegram.js';
 
 const env = (k, d) => (process.env[k] !== undefined && process.env[k] !== '' ? process.env[k] : d);
@@ -24,7 +24,7 @@ async function makeVideo(p, prompt, head) {
     await sleep(poll);
     const s = await video.status(id);
     if (s.status === 'FAILED') throw new Error(`Vídeo: ${s.error}`);
-    if (s.status === 'COMPLETED') { await telegram.sendVideo({ buffer: await video.file(id), caption: head.slice(0, 1000) }); return; }
+    if (s.status === 'COMPLETED') { await telegram.sendVideo({ buffer: await video.file(id), caption: head, html: true }); return; }
   }
   throw new Error('Vídeo demorou demais');
 }
@@ -37,14 +37,13 @@ async function processProduct(p, report, { video: withVideo = true } = {}) {
   catch (e) { report.errors.push(`Prompt (${(p.name || '').slice(0, 30)}): ${e.message}`); }
   try { caption = await openai.generateCaption({ product: { name: p.name, category: p.category } }); } catch { /* segue sem legenda */ }
 
-  const info = telegram.formatProductMessage({ product, caption });
-  const head = info + (prompt ? '\n\n👇 O prompt do vídeo vem na próxima mensagem. Cole no YouTube Create junto com esta foto.' : '');
-  if (p.image) { try { await telegram.sendPhoto({ photoUrl: p.image, caption: head }); } catch { await telegram.sendMessage(head); } }
-  else await telegram.sendMessage(head);
+  const head = telegram.formatProductMessage({ product, caption });
+  if (p.image) { try { await telegram.sendPhoto({ photoUrl: p.image, caption: head, html: true }); } catch { await telegram.sendMessage(head, { html: true }); } }
+  else await telegram.sendMessage(head, { html: true });
   if (prompt) await telegram.sendMessage(prompt);
 
   if (withVideo && prompt && env('AUTO_VIDEO', 'false') === 'true' && video.isConfigured()) {
-    try { await makeVideo(p, prompt, info); } catch (e) { report.errors.push(e.message); }
+    try { await makeVideo(p, prompt, head); } catch (e) { report.errors.push(e.message); }
   }
   return Boolean(prompt);
 }

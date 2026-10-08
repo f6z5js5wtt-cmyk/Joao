@@ -36,7 +36,7 @@ export async function listModels() {
 
 // Só baixa imagens de domínios da Shopee (evita usar o servidor para acessar endereços internos)
 const HOST_OK = /(^|\.)(shopee\.com(\.br)?|susercontent\.com)$/i;
-async function fetchImage(url) {
+export async function fetchImage(url) {
   try {
     const u = new URL(url);
     if (u.protocol !== 'https:' || !HOST_OK.test(u.hostname)) return { note: 'Imagem ignorada: endereço não permitido.' };
@@ -69,7 +69,7 @@ export async function start({ prompt, imageUrl }) {
   });
   if (!j.name) throw fail('O Google não devolveu o código da operação');
   usage.n++;
-  return { id: j.name, note: img.note || '' };
+  return { id: j.name, note: img.note || '', info: { duration: DURATION, aspect: '9:16' } };
 }
 
 const OP = /^models\/[\w.\-]+\/operations\/[\w\-]+$/;

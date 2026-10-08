@@ -2,15 +2,18 @@ import express from 'express';
 import cors from 'cors';
 import * as shopee from './shopee.js';
 import * as openai from './openai.js';
-import * as video from './video.js';
+import * as video from './videoProvider.js';
 import * as telegram from './telegram.js';
 import * as auto from './auto.js';
+import * as auth from './auth.js';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 
 const app = express();
 app.use(express.json());
 app.use(cors({ origin: process.env.ALLOWED_ORIGIN }));
+app.set('trust proxy', 1);
+auth.install(app); // senha de acesso (PANEL_PASSWORD)
 
 app.get('/api/shopee/status', (_req, res) =>
   res.json({ configured: shopee.isConfigured(), appId: shopee.maskedAppId() }));
@@ -94,7 +97,7 @@ app.post('/api/telegram/test', async (_req, res) => {
   catch (e) { res.status(e.status || 502).json({ error: e.message }); }
 });
 app.post('/api/telegram/message', async (req, res) => {
-  try { if (tgLimit(res)) return; await telegram.sendMessage(telegram.formatProductMessage(req.body || {})); res.json({ ok: true }); }
+  try { if (tgLimit(res)) return; await telegram.sendMessage(telegram.formatProductMessage(req.body || {}), { html: true }); res.json({ ok: true }); }
   catch (e) { res.status(e.status || 502).json({ error: e.message }); }
 });
 app.post('/api/telegram/send', async (req, res) => {
